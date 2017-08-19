@@ -13,4 +13,4 @@ compress no;
 
 -- ----------------------------------------------------------------------------
 select count(*) from srdf.parature_ticket_custom_tmp with ur;
-select * from srdf.parature_ticket_custom_tmp with ur;
+select * from srdf.parature_ticket_custom_tmp fetch first 500 rows only with ur;
