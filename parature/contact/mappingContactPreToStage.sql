@@ -7,7 +7,7 @@ select * from camdf.parature_contact_prestg fetch first 100 rows only;
 
 select distinct customer_custom_field_name, customer_custom_field_type from camdf.parature_contact_custom_prestg with ur;
 
--- Customer fields that are too long
+-- Issue 1. Customer fields that are too long
 select 'phone_number',count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'PHONE_NUMBER' and length(rtrim(customer_custom_field_value)) > 50 union
 select 'alternate_phone_number',count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'ALTERNATE_PHONE_NUMBER' and length(rtrim(customer_custom_field_value)) > 40 union
 select 'contact_country',count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'CONTACT_COUNTRY' and length(rtrim(customer_custom_field_value)) > 256 union
@@ -22,6 +22,15 @@ select 'timezone',count(*) from camdf.parature_contact_custom_prestg cc where cu
 
 select substr(customer_custom_field_value,1,50), rtrim(customer_custom_field_value) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'PHONE_NUMBER' and length(rtrim(customer_custom_field_value)) > 50 with ur; 
 
+-- Issue 2. Some contacts had more than one custom phone number field for a given value
+select customer_id, count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'PHONE_NUMBER' and customer_custom_field_value is not null group by customer_id having count(*) > 1;
+select customer_id, count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'ALTERNATE_PHONE_NUMBER'  and customer_custom_field_value is not null group by customer_id having count(*) > 1;
+select customer_id, count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'CONTACT_COUNTRY'  and customer_custom_field_value is not null group by customer_id having count(*) > 1;
+select customer_id, count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'PREFERRED_LANGUAGE'  and customer_custom_field_value is not null group by customer_id having count(*) > 1;
+select customer_id, count(*) from camdf.parature_contact_custom_prestg cc where customer_custom_field_name = 'TIMEZONE'  and customer_custom_field_value is not null group by customer_id having count(*) > 1;
+
+select * from camdf.parature_contact_custom_prestg where customer_id = 7839171;
+
 --truncate table camdf.parature_contact immediate;
 
 insert into camdf.parature_contact (
@@ -31,8 +40,7 @@ insert into camdf.parature_contact (
    date_created, date_modified, date_last_visited)
 select 
    c.customer_id, email, first_name, last_name, customer_role, status, 
-   --(select substr(customer_custom_field_value,1,50) from camdf.parature_contact_custom_prestg cc where cc.customer_id = c.customer_id and customer_custom_field_name = 'PHONE_NUMBER') as phone_number,
-   '',
+   (select distinct substr(customer_custom_field_value,1,50) from camdf.parature_contact_custom_prestg cc where cc.customer_id = c.customer_id and customer_custom_field_name = 'PHONE_NUMBER') as phone_number,
    (select substr(customer_custom_field_value,1,40) from camdf.parature_contact_custom_prestg cc where cc.customer_id = c.customer_id and customer_custom_field_name = 'ALTERNATE_PHONE_NUMBER') as alternate_phone_number,
    (select substr(customer_custom_field_value,1,256) from camdf.parature_contact_custom_prestg cc where cc.customer_id = c.customer_id and customer_custom_field_name = 'CONTACT_COUNTRY') as contact_country,
    (select substr(customer_custom_field_value,1,64) from camdf.parature_contact_custom_prestg cc where cc.customer_id = c.customer_id and customer_custom_field_name = 'PREFERRED_LANGUAGE') as preferred_language,
