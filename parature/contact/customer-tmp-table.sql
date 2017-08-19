@@ -1,6 +1,6 @@
-drop table camdf.parature_contact_tmp;
+drop table camdf.parature_contact_prestg;
 
-create table camdf.parature_contact_tmp (
+create table camdf.parature_contact_prestg (
 	customer_id bigint,
 	account_id bigint,
 	customer_role varchar(50),
@@ -9,7 +9,8 @@ create table camdf.parature_contact_tmp (
 	last_name vargraphic(128),
 	status varchar(20),
 	date_created timestamp,
-	date_updated timestamp
+	date_updated timestamp,
+	date_visited timestamp
 )
 data capture none 
 compress no;
