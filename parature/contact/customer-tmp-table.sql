@@ -18,5 +18,5 @@ compress no;
 --call util.sp_grant;
 
 -- ----------------------------------------------------------------------------
-select count(*) from camdf.parature_contact_tmp with ur;
-select * from camdf.parature_contact_tmp with ur;
+select count(*) from camdf.parature_contact_prestg with ur;
+select * from camdf.parature_contact_prestg with ur;
