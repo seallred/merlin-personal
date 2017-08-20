@@ -1,8 +1,8 @@
 -- Map and load parature_contact_prestg to parature_contact
 
-select count(*) from camdf.parature_contact with ur;
+select count(*) from camdf.parature_contact with ur; -- 2718752
 select * from camdf.parature_contact fetch first 100 rows only;
-select count(*) from camdf.parature_contact_prestg;
+select count(*) from camdf.parature_contact_prestg;  -- 2718776
 select * from camdf.parature_contact_prestg fetch first 100 rows only;
 
 select distinct customer_custom_field_name, customer_custom_field_type from camdf.parature_contact_custom_prestg with ur;
@@ -56,3 +56,47 @@ select distinct
 from camdf.parature_contact_prestg c
 where not exists (select 1 from camdf.parature_contact t where c.customer_id = t.customer_id)
 fetch first 250000 rows only;
+
+
+-- IBM UID: pull in ibm_uid from SSM_REGISTERED_USERS_TMP
+select * from camdf.ssm_registered_users_tmp fetch first 1000 rows only;
+
+-- 868435
+select count(distinct ssm.ibm_uid) from camdf.parature_contact c
+   inner join camdf.ssm_registered_users_tmp ssm on upper(c.email) = upper(ssm.email_address) and ssm.ibm_uid is not null;
+
+select upper(ssm.email_address), ibm_uid, count(*)
+from camdf.ssm_registered_users_tmp ssm where ibm_uid is not null
+group by upper(ssm.email_address), ibm_uid having count(*) > 1 with ur;
+
+select * from camdf.ssm_registered_users_tmp ssm  where upper(ssm.email_address) = 'V2TESTUSER.IBM.918273465@MAILINATOR.COM'
+
+select count(*) from camdf.parature_contact where ibm_uid is null; -- 2718752
+select email, count(*) from camdf.parature_contact group by email having count(*) > 1; -- 
+
+merge into camdf.parature_contact o using (
+  select distinct email_address, ibm_uid
+  from camdf.ssm_registered_users_tmp ssm
+  where ibm_uid is not null
+) n on n.email_address = o.email
+when matched then update set o.ibm_uid = n.ibm_uid;
+
+
+select * from camdf.parature_contact pc where pc.email = 'craigfh@us.ibm.com' with ur;
+update camdf.parature_contact pc set ibm_uid = (select distinct ibm_uid from camdf.ssm_registered_users_tmp ssm where pc.email = ssm.email_address)
+ where pc.email = 'craigfh@us.ibm.com';
+ 
+select * from camdf.parature_contact pc where pc.EMAIL IN ('115107744@umail.ucc.ie','1195734132@qq.com') with ur;
+-- This worked fine
+update camdf.parature_contact pc set ibm_uid = (select distinct ibm_uid from camdf.ssm_registered_users_tmp ssm where pc.email = ssm.email_address and ssm.ibm_uid is not null fetch first row only)
+ where pc.ibm_uid is null
+   and exists (select 1 from camdf.ssm_registered_users_tmp t where pc.email = t.email_address and t.ibm_uid is not null)
+fetch first 200000 rows only;
+
+select count(*) from camdf.parature_contact pc where ibm_uid is null;
+select count(*) from camdf.parature_contact pc where update_datetime >= current timestamp - 2 hours with ur;
+select * from camdf.parature_contact pc where update_datetime >= current timestamp - 2 hours with ur;
+ 
+ 
+ 
+ 

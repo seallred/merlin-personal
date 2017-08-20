@@ -1,6 +1,6 @@
 -- Map and load parature_account_prestg to parature_account
 
-select count(*) from camdf.parature_account with ur;
+select count(*) from camdf.parature_account with ur; -- 2494773
 select * from camdf.parature_account fetch first 100 rows only;
 select count(*) from camdf.parature_account_prestg; -- 2494780
 select * from camdf.parature_account_prestg fetch first 100 rows only;
