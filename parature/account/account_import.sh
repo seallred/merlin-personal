@@ -1,10 +1,8 @@
-#gzip -dS .gzip accounts.csv.gzip
+echo "Loading data to CAMDF.PARATURE_ACCOUNT..."
+#gzip -d CAMDF.PARATURE_ACCOUNT.IXF.gz
 
 db2 connect to etl2sf
-db2 -v truncate table camdf.parature_account_tmp immediate;
+db2 "IMPORT FROM CAMDF.PARATURE_ACCOUNT.IXF OF IXF COMMITCOUNT 50000 
+INSERT INTO CAMDF.PARATURE_ACCOUNT (ACCOUNT_ID, ACCOUNT_NAME, IBM_CUST_NUM, TYPE, CUSTOMER_HUB_ID, CUSTOMER_HUB_KEY,CLIENT_STREET, CLIENT_CITY, CLIENT_STATE_REGION, CLIENT_POSTAL_CODE, CLIENT_COUNTRY,PREMIUM_ACCOUNT, ALERT_INDICATOR, ALERT_COMMENTS, DATE_CREATED, DATE_LAST_MODIFIED)" >> IMPORT_PARATURE_ACCOUNT.ERR
 
-echo Processing... 
-rm accounts.msg 2>/dev/null
-
-db2 import from accounts.csv of del modified by delprioritychar timestampformat=\"YYYY-MM-DD HH:MM:SS.UUUUUU\" commitcount 5000 skipcount 1 messages accounts.msg insert into camdf.parature_account_tmp
-
+#gzip CAMDF.PARATURE_CONTACT_PRESTG.IXF
